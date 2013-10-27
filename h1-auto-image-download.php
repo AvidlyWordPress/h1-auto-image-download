@@ -12,10 +12,12 @@ License: GPLv2
 require_once( 'class-h1-auto-image-download.php');
 require_once( 'class-h1-auto-image-download-admin.php');
 
-add_action( 'init', function () {
+add_action( 'init', 'h1_auto_image_download_init' );
+
+function h1_auto_image_download_init() {
 	$auto_image_download = new H1_AutoImageDownload;
 
 	if ( is_admin() ) {
 		new H1_AutoImageDownload_Admin( H1_AutoImageDownload::$option_name );
 	}
-});
+}
