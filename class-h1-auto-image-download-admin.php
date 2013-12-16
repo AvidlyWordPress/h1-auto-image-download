@@ -60,7 +60,7 @@ class H1_AutoImageDownload_Admin {
 
 	function download_content_root_callback() {
 		printf(
-			'<input type="url" id="' . $this->option_name . '_url" name="' . $this->option_name . '[url]" value="%s" />',
+			'<input type="url" id="' . $this->option_name . '_url" name="' . $this->option_name . '[url]" value="%s" class="regular-text" />',
 			isset( $this->options[ 'url' ] ) ? esc_attr( $this->options[ 'url' ] ) : ''
 		);
 	}
@@ -69,9 +69,10 @@ class H1_AutoImageDownload_Admin {
 		$extensions = isset( $this->options[ 'allowed_extensions' ] ) ? $this->options[ 'allowed_extensions' ] : $this->default_extensions;
 
 		printf(
-			'<input type="text" id="' . $this->option_name . '_allowed_extensions" name="' . $this->option_name . '[allowed_extensions]" value="%s" />',
+			'<input type="text" id="' . $this->option_name . '_allowed_extensions" name="' . $this->option_name . '[allowed_extensions]" value="%s" class="regular-text" />',
 			esc_attr( $extensions )
 		);
+		print '<p class="description">' . __( 'The uploads directory of your remote site, for example http://example.com/wp-content/uploads', 'h1-auto-image-download' ) . '</p>';
 	}
 
 	function plugin_menu() {
