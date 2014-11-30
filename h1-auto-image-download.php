@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: H1 Auto Image Download
-Version: 1.0
+Version: 1.1
 Author URI: http://h1.fi/
 Plugin URI: http://h1.fi/plugins/h1-auto-image-download
-Description: If an image is not found, this plugins downloads the image from another server. Good for development purposes, when you have copied the database over from the production server, but do not want to bother with dowloading all the images. <strong>Not intended for production use</strong>.
-Author: Aki Björklund/H1
+Description: If an image is not found, this plugins downloads the image from another server (or redirects to it). Good for development purposes, when you have copied the database over from the production server, but do not want to bother with dowloading all the images. <strong>Not intended for production use</strong>.
+Author: Aki Björklund / H1
 License: GPLv2 or later
 */
 

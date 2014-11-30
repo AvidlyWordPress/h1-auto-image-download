@@ -46,6 +46,14 @@ class H1_AutoImageDownload_Admin {
 		);
 
 		add_settings_field(
+			$this->option_name . '_download',
+			__( 'Download the image (if not, a redrect to original content url is made)', 'h1_auto_image_download' ),
+			array( $this, 'download_download_callback' ),
+			$this->options_page_name,
+			$this->options_section
+		);
+
+		add_settings_field(
 			$this->option_name . '_allowed_extensions',
 			__( 'Allowed extensions', 'h1_auto_image_download' ),
 			array( $this, 'allowed_extensions_callback' ),
@@ -62,6 +70,13 @@ class H1_AutoImageDownload_Admin {
 		printf(
 			'<input type="url" id="' . $this->option_name . '_url" name="' . $this->option_name . '[url]" value="%s" class="regular-text" />',
 			isset( $this->options[ 'url' ] ) ? esc_attr( $this->options[ 'url' ] ) : ''
+		);
+	}
+
+	function download_download_callback() {
+		printf(
+			'<input type="checkbox" id="' . $this->option_name . '_download" name="' . $this->option_name . '[download]" %s value="1" />',
+			( isset( $this->options[ 'download' ] ) && $this->options[ 'download' ] == '1' ) ? 'checked' : ''
 		);
 	}
 
@@ -86,6 +101,7 @@ class H1_AutoImageDownload_Admin {
 	}
 
 	function plugin_options() {
+		flush_rewrite_rules();
 		?>
 		<div class="wrap">
 			<?php screen_icon(); ?>

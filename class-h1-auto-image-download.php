@@ -1,77 +1,131 @@
 <?php
 
 class H1_AutoImageDownload {
-    private $options;
-    private $content_base_url;
-    private $content_base_dir;
+	private $options;
+	private $content_base_url;
+	private $content_base_dir;
 
-    public static $option_name = 'h1_auto_image_download';
+	private $version = '1.1';
+	private $endpoint = 'h1_auto_image_download';
 
-    function __construct() {
-    	$this->options = get_option( self::$option_name );
-    	//validate options
+	private $option_name = 'h1_auto_image_download';
+
+	public function __construct() {
+		$this->options = get_option( $this->option_name );
+
+		// Validate options.
 		if ( $this->options === false
-			|| ! $this->options[ 'url' ]
-			|| ! $this->options[ 'allowed_extensions' ] ) {
-			//plugin not set up properly, cancel execution
+			|| ! $this->options['url' ]
+			|| ! $this->options['allowed_extensions'] ) {
+			// Plugin not set up properly, cancel execution.
 			return;
 		}
 
+		// Get WordPress installation base url and dir.
 		$wp_upload_dir = wp_upload_dir();
-		$this->content_base_url = $wp_upload_dir[ 'baseurl' ];
-		$this->content_base_dir = $wp_upload_dir[ 'basedir' ];
+		$this->content_base_url = $wp_upload_dir['baseurl'];
+		$this->content_base_dir = $wp_upload_dir['basedir'];
 
-    	add_action( 'template_redirect', array( $this, 'h1_auto_image_download_filter_404' ), 0 );
-    }
+		// Register script that will detect 404s.
+		wp_register_script( 'h1_auto_image_download', plugins_url( 'h1-auto-image-download.js', __FILE__ ), 'jquery', $this->version, true );
+		wp_localize_script( 'h1_auto_image_download', 'h1aimd', array(
+			'home_url' => get_home_url(),
+			'content_base_url' => $this->content_base_url,
+			'endpoint' => $this->endpoint,
+		) );
+		wp_enqueue_script( 'h1_auto_image_download' );
 
-	function h1_auto_image_download_filter_404() {
-		if ( ! is_404() ) return false;
+		// Register endpoint url that the JavaScript will use.
+		add_rewrite_endpoint( $this->endpoint, EP_ROOT );
 
-		$mirror_path = $this->get_valid_mirror_path();
-		if ( $mirror_path === false ) return;
-
-		$path_parts = pathinfo( $mirror_path );
-
-		// the domain and path images are downloaded from
-		// for example http://example.com/wp-content/uploads/
-		$image_mirror_root = $this->options[ 'url' ];
-
-		//download
-		$todownload = untrailingslashit( $image_mirror_root ) . $mirror_path;
-		$response = wp_remote_get( $todownload );
-		if ( is_wp_error( $response ) ) {
-			return;
-		}
-		$body = wp_remote_retrieve_body( $response );
-
-		//create folders, if not exists
-		$full_path = $this->content_base_dir . $path_parts[ 'dirname' ];
-		if ( ! file_exists( $full_path ) ) {
-			$root_permissions = substr( sprintf( '%o', fileperms( $this->content_base_dir ) ), -4 );
-			mkdir( $this->content_base_dir . $path_parts[ 'dirname' ], $root_permissions, true );
-		}
-
-		//save
-		file_put_contents( trailingslashit( $full_path ) . $path_parts[ 'basename' ], $body );
-
-		//redirect to the same file, but with a querystring to prevent unintended redirect loops
-		header( 'Location: ' . $this->content_base_url . $mirror_path . '?downloaded' );
-		die();
+		// Register the URL processor.
+		add_action( 'parse_query', array( $this, 'process_url' ) );
 	}
 
-	function get_valid_mirror_path() {
-		//get request path
-		$path = urldecode( $_SERVER[ 'REQUEST_URI' ] );
+	/**
+	 * Check if the URL contains the endpoint and then download the image or redirect.
+	 */
+	public function process_url() {
+		global $wp_query;
+		if ( isset( $wp_query->query_vars[ $this->endpoint ] ) ) {
+			$img_path = $wp_query->query_vars[ $this->endpoint ];
+			// check for seting weather to redirect or first download the image
+			if ( $this->options[ 'download' ] ) {
+				$this->try_download( $img_path );
+			} else {
+				$this->redirect( $img_path );
+			}
+		}
+	}
+
+	/**
+	 * Redirect to mirror url by image path
+	 * @param string $img_path Path of the image inside uploads folder
+	 */
+	public function redirect( $img_path ) {
+		$mirror_url = $this->get_mirror_url( $img_path );
+		if ( false === $mirror_url ) {
+			status_header( 404 );
+			exit;
+		} else {
+			wp_redirect( $mirror_url, 301 );
+			exit;
+		}
+	}
+
+	/**
+	 * Try downloading and saving the image locally and then redirect to it.
+	 * @param string $img_path Path of the image inside uploads folder
+	 */
+	public function try_download( $img_path ) {
+		if ( ! function_exists('WP_Filesystem') ) {
+			require ABSPATH . 'wp-admin/includes/file.php';
+		}
+		global $wp_filesystem;
+		WP_Filesystem();
+
+		$mirror_url = $this->get_mirror_url( $img_path );
+		if ( $mirror_url === false ) {
+			status_header( 404 );
+			exit;
+		}
+
+		// Download
+		$response = wp_remote_get( $mirror_url );
+
+		// Die if not successful.
+		if ( is_wp_error( $response ) || 200 !== $response['response']['code'] ) {
+			wp_die( __( 'Unable to download the file.', 'h1aid' ) );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		$abspath = $this->content_base_dir;
+		$destination = trailingslashit( $abspath ) . $img_path;
+
+		// Save to file system.
+		$result = $wp_filesystem->put_contents( $destination, $response['body'], FS_CHMOD_FILE ); // predefined mode settings for WP files
+
+		// Redirect if successful.
+		if ( true === $result ) {
+			wp_redirect( trailingslashit( $this->content_base_url ) . $img_path, 301 );
+			exit;
+		} else {
+			wp_die( __( 'Unable to save file to filesystem.', 'h1aid' ) );
+		}
+	}
+
+	/**
+	 * Get the URL of the file on the site we are mirroring.
+	 * @param string $path Path of the file, without the uploads root part
+	 * @return string The mirror URL
+	 */
+	public function get_mirror_url( $path ) {
 		if ( substr( $path, 0, 1 ) == '/' ) {
 			$path = substr( $path, 1 );
 		}
 
-		$path_remaining = $this->validate_common_path( $this->content_base_url, $path );
-		if ( $path_remaining === false ) {
-			return false;
-		}
-
-		$path_parts = pathinfo( $path_remaining );
+		$path_parts = pathinfo( $path );
 		$extension = $path_parts[ 'extension' ];
 
 		if ( ! $this->validate_extension(
@@ -80,29 +134,16 @@ class H1_AutoImageDownload {
 			return false;
 		}
 
-		return $path_remaining;
+		return trailingslashit( $this->options['url'] ) . $path;
 	}
 
-	//find $content_directory_url's and $path's common part
-	function validate_common_path( $content_directory_url, $path ) {
-		$len = 1;
-		while ( $len < strlen( $content_directory_url ) ) {
-			if ( substr( $content_directory_url, -$len ) == substr($path, 0, $len ) )
-				break;
-			$len++;
-		}
-		if ( $len >= strlen( $content_directory_url ) ) {
-			//no common part found
-			return false;
-		}
-		//store the part after common part to $path_remaining
-		$path_remaining = substr( $path, $len );
-
-		return $path_remaining;
-	}
-
-	//make sure url ends with one of the allowed extensions
-	function validate_extension( $extension, $allowed_extensions ) {
+	/**
+	 * Make sure url ends with one of the allowed extensions.
+	 * @param string $extension Extension to validate
+	 * @param string $allowed_extensions Comma separated list of allowed extensions
+	 * @return bool Whether the extension is allowed
+	 */
+	public function validate_extension( $extension, $allowed_extensions ) {
 		//prepare allowed_extensions
 		$extensions = explode( ',', $allowed_extensions );
 		$extensions = array_map( 'trim', $extensions );
