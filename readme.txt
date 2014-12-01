@@ -7,7 +7,7 @@ Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-If an image is not found, this plugins downloads the image from another server. Makes it easy to mirror production for development purposes.
+If an image is not found, this plugin downloads the image from another server. Makes it easy to mirror production for development purposes.
 
 == Description ==
 

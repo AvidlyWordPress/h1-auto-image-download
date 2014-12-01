@@ -49,7 +49,7 @@ class H1_AutoImageDownload {
 		global $wp_query;
 		if ( isset( $wp_query->query_vars[ $this->endpoint ] ) ) {
 			$img_path = $wp_query->query_vars[ $this->endpoint ];
-			// check for seting weather to redirect or first download the image
+			// check for setting whether to redirect or first download the image
 			if ( $this->options[ 'download' ] ) {
 				$this->try_download( $img_path );
 			} else {
