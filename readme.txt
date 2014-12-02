@@ -13,7 +13,7 @@ If an image is not found, this plugin downloads the image from another server. M
 
 To debug an issue on a production website, you often copy the database over from production. Maybe you do that manually or using WP Migrate Pro. You would also like to have the images to have a complete copy, but the production site might have a huge amount of them and you have no time to waste. So you try to survive without them. But now you don't have to.
 
-H1 Auto Image Download can automatically and seamlessly download the images requested from your production server. You will only have to tell it where to download the images from and now your development site works as if it has all the files it needs. Optionally you can also just redirect to the procution files.
+H1 Auto Image Download can automatically and seamlessly download the images requested from your production server. You will only have to tell it where to download the images from and now your development site works as if it has all the files it needs. Optionally you can also just redirect to the production files.
 
 == Installation ==
 
