@@ -18,6 +18,6 @@ function h1_auto_image_download_init() {
 	$auto_image_download = new H1_AutoImageDownload;
 
 	if ( is_admin() ) {
-		new H1_AutoImageDownload_Admin( H1_AutoImageDownload::$option_name );
+		new H1_AutoImageDownload_Admin( H1_AutoImageDownload::OPTION_NAME );
 	}
 }

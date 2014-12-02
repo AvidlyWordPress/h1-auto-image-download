@@ -8,10 +8,10 @@ class H1_AutoImageDownload {
 	private $version = '1.1';
 	private $endpoint = 'h1_auto_image_download';
 
-	private $option_name = 'h1_auto_image_download';
+	const OPTION_NAME = 'h1_auto_image_download';
 
 	public function __construct() {
-		$this->options = get_option( $this->option_name );
+		$this->options = get_option( self::OPTION_NAME );
 
 		// Validate options.
 		if ( $this->options === false
