@@ -3,7 +3,7 @@ Contributors: akibjorklund
 Tags: development, tool
 Requires at least: 3.7
 Tested up to: 4.1
-Stable tag: 1.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,10 @@ H1 Auto Image Download can automatically and seamlessly download the images requ
 1. Go to the Auto Image Download settings page under Settings and set up the mirrored url
 
 == Changelog ==
+
+= 1.1.1 =
+* Fix issue in admin
+* Fix typos
 
 = 1.1 =
 * Make H1 Auto Image Download work in multisite environments
