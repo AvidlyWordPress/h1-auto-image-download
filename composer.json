@@ -2,12 +2,15 @@
 	"name": "h1fi/h1-auto-image-download",
 	"description": "If an image is not found in WordPress, this plugin downloads the image from another server. Makes it easy to mirror production for development purposes..",
 	"license": "GPLv2 or later",
-	"type": "wpplugin",
+	"type": "wordpress-plugin",
 	"authors": [
 		{
 			"name": "Aki Björklund",
 			"email": "aki@h1.fi"
 		}
 	],
+	"require": {
+		"composer/installers": "*"
+	},
 	"minimum-stability": "dev"
 }
