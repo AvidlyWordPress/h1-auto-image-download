@@ -1,5 +1,5 @@
 {
-	"name": "H1FI/composer-dropin-installer",
+	"name": "h1fi/composer-dropin-installer",
 	"description": "If an image is not found, this plugin downloads the image from another server. Makes it easy to mirror production for development purposes..",
 	"license": "GPLv2 or later",
 	"type": "wpplugin",
