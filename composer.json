@@ -1,0 +1,13 @@
+{
+	"name": "H1FI/composer-dropin-installer",
+	"description": "If an image is not found, this plugin downloads the image from another server. Makes it easy to mirror production for development purposes..",
+	"license": "GPLv2 or later",
+	"type": "wpplugin",
+	"authors": [
+		{
+			"name": "Aki Björklund",
+			"email": "aki@h1.fi"
+		}
+	],
+	"minimum-stability": "dev",
+}
